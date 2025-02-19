@@ -44,7 +44,7 @@ const Home = () => {
           </div>
 
           {/* Call to Action Button */}
-          <Link to="/register">
+          <Link to="/user/register">
             <button className="mt-8 px-6 py-3 bg-white text-green-500 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition duration-300">
               Get Started
             </button>

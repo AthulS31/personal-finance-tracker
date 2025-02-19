@@ -1,95 +1,206 @@
-import AdminLayout from '../../../../components/AdminLayout';
-import axios from '../../../../utils/axios';
-import { useState, useEffect } from 'react';
-import { Input, Button, Select } from 'antd';
+import React, { useEffect } from 'react';
+import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
+import * as Yup from 'yup';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  FaRupeeSign,
+  FaCalendarAlt,
+  FaRegCommentDots,
+  FaWallet,
+} from 'react-icons/fa';
+import { listCategoriesAPI } from '../../../../services/category/categoryService';
+import { addTransactionAPI } from '../../../../services/transaction/transactionService';
+import AlertMessage from '../../../../components/Alert/AlertMessage';
 
 import './add.css';
 
-const { TextArea } = Input;
+const validationSchema = Yup.object({
+  type: Yup.string()
+    .required('Transaction type is required')
+    .oneOf(['income', 'expense']),
+  amount: Yup.number()
+    .required('Amount is required')
+    .positive('Amount must be positive'),
+  category: Yup.string().required('Category is required'),
+  date: Yup.date().required('Date is required'),
+  description: Yup.string(),
+});
 
 const Add = () => {
   const navigate = useNavigate();
-  const [transaction, setTransaction] = useState({
-    name: '',
-    category: [],
+
+  // Mutation
+  const {
+    mutateAsync,
+    isPending,
+    // isError: isAddTranErr,
+    // error: transErr,
+    isSuccess,
+  } = useMutation({
+    mutationFn: addTransactionAPI,
+    mutationKey: ['add-transaction'],
   });
-  const [categorys, setCategorys] = useState([]);
+  //fetching
+  const { data, isError, isLoading, isFetched, error, refetch } = useQuery({
+    queryFn: listCategoriesAPI,
+    queryKey: ['list-categories'],
+  });
 
-  const getCategory = async () => {
-    const response = await axios.get('/category');
-    const convertedData = response.data.map(item => {
-      return { value: item._id, label: item.name };
-    });
-    setCategorys(convertedData);
-  };
-
-  useEffect(() => {
-    getCategory();
-  }, []);
-
-  console.log(categorys);
-
-  const onChange = (e, key) => {
-    console.log(e);
-    if(key == 'category'){
-      setTransaction({ ...transaction, category:e });
-    }
-    else setTransaction({ ...transaction, [key]: e.target.value });
-  };
-
-  const onUploadImage = async e => {
-    const formData = new FormData();
-    console.log(e.target.files[0]);
-    formData.append('avatar', e.target.files[0]);
-    const response = await axios.post('/upload', formData);
-    console.log(response);
-    setTransaction({ ...transaction, image: response.data.url });
-  };
-
-  const onAddTransaction = async () => {
-    try {
-      const response = await axios.post('/transaction', transaction);
-      navigate('/user/transaction');
-    } catch (error) {
-      toast.error(e.message);
-    }
-  };
+  const formik = useFormik({
+    initialValues: {
+      type: '',
+      amount: '',
+      category: '',
+      date: '',
+      description: '',
+    },
+    validationSchema,
+    onSubmit: values => {
+      console.log(values);
+      mutateAsync(values)
+        .then(data => {
+          console.log(data);
+        })
+        .catch(e => console.log(e));
+    },
+  });
 
   return (
-    <AdminLayout heading="Add Transaction">
-      <ToastContainer />
-      <div className="add-transaction-form">
-        <div className="input-container">
-          <label>Name</label>
-          <Input onChange={e => onChange(e, 'name')} />
-        </div>
-        <div className="input-container">
-          <label>Image</label>
-          <Input type="file" onChange={onUploadImage} />
-        </div>
-        <div className="input-container">
-          <label>Phone Number</label>
-          <Input onChange={e => onChange(e, 'phonenumber')} />
-        </div>
-        <div className="input-container">
-          <label>Location</label>
-          <Input onChange={e => onChange(e, 'location')} />
-        </div>
-        <div className="input-container">
-          <label>Categorys</label>
-          <Select mode="multiple" options={categorys} onChange={e => onChange(e, 'category')} />
-        </div>
-        <div className="input-container">
-          <label>About</label>
-          <TextArea rows={5} onChange={e => onChange(e, 'about')} />
-        </div>
+    <form
+      onSubmit={formik.handleSubmit}
+      className="max-w-lg mx-auto my-10 bg-white p-6 rounded-lg shadow-lg space-y-6"
+    >
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold text-gray-800">
+          Transaction Details
+        </h2>
+        <p className="text-gray-600">Fill in the details below.</p>
       </div>
-      <div className="add-button-container">
-        <Button onClick={onAddTransaction}>Add</Button>
+      {/* Display alert message */}
+
+      {isError && (
+        <AlertMessage
+          type="error"
+          message={error?.response?.data?.message || 'Please try again later'}
+        />
+      )}
+      {isSuccess && (
+        <AlertMessage type="success" message="Transaction added" />
+      )}
+      {/* Transaction Type Field */}
+      <div className="space-y-2">
+        <label
+          htmlFor="type"
+          className="flex gap-2 items-center text-gray-700 font-medium"
+        >
+          <FaWallet className="text-blue-500" />
+          <span>Type</span>
+        </label>
+        <select
+          {...formik.getFieldProps('type')}
+          id="type"
+          className="block w-full p-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+        >
+          <option value="">Select transaction type</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        {formik.touched.type && formik.errors.type && (
+          <p className="text-red-500 text-xs">{formik.errors.type}</p>
+        )}
       </div>
-    </AdminLayout>
+
+      {/* Amount Field */}
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="amount" className="text-gray-700 font-medium">
+          <FaRupeeSign className="inline mr-2 text-blue-500" />
+          Amount
+        </label>
+        <input
+          type="number"
+          {...formik.getFieldProps('amount')}
+          id="amount"
+          placeholder="Amount"
+          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+        />
+        {formik.touched.amount && formik.errors.amount && (
+          <p className="text-red-500 text-xs italic">{formik.errors.amount}</p>
+        )}
+      </div>
+
+      {/* Category Field */}
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="category" className="text-gray-700 font-medium">
+          <FaRegCommentDots className="inline mr-2 text-blue-500" />
+          Category
+        </label>
+        <select
+          {...formik.getFieldProps('category')}
+          id="category"
+          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+        >
+          <option value="">Select a category</option>
+          {data?.map(category => {
+            return (
+              <option key={category?._id} value={category?.name}>
+                {category?.name}
+              </option>
+            );
+          })}
+        </select>
+        {formik.touched.category && formik.errors.category && (
+          <p className="text-red-500 text-xs italic">
+            {formik.errors.category}
+          </p>
+        )}
+      </div>
+
+      {/* Date Field */}
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="date" className="text-gray-700 font-medium">
+          <FaCalendarAlt className="inline mr-2 text-blue-500" />
+          Date
+        </label>
+        <input
+          type="date"
+          {...formik.getFieldProps('date')}
+          id="date"
+          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+        />
+        {formik.touched.date && formik.errors.date && (
+          <p className="text-red-500 text-xs italic">{formik.errors.date}</p>
+        )}
+      </div>
+
+      {/* Description Field */}
+      <div className="flex flex-col space-y-1">
+        <label htmlFor="description" className="text-gray-700 font-medium">
+          <FaRegCommentDots className="inline mr-2 text-blue-500" />
+          Description (Optional)
+        </label>
+        <textarea
+          {...formik.getFieldProps('description')}
+          id="description"
+          placeholder="Description"
+          rows="3"
+          className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+        ></textarea>
+        {formik.touched.description && formik.errors.description && (
+          <p className="text-red-500 text-xs italic">
+            {formik.errors.description}
+          </p>
+        )}
+      </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors duration-200"
+      >
+        Submit Transaction
+      </button>
+    </form>
   );
 };
 export default Add;

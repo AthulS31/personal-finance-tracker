@@ -82,8 +82,9 @@ module.exports.getTransactionById = async (req, res) => {
 module.exports.updateTransaction = async (req, res) => {
   try {
     const transaction = await Transaction.findById(req.params.id);
+    // Check if the creator is the one updating the data
     if (transaction && transaction.user.toString() === req.user.toString()) {
-      (transaction.type = req.body.type || transaction.type),
+       (transaction.type = req.body.type || transaction.type),
         (transaction.category = req.body.category || transaction.category),
         (transaction.amount = req.body.amount || transaction.amount),
         (transaction.date = req.body.date || transaction.date),

@@ -92,3 +92,60 @@ module.exports.login = async (req, res) => {
     res.status(500).json({ message: e.message, error: true });
   }
 };
+
+module.exports.profile = async (req, res) => {
+  try {
+    //! Find the user
+    console.log(req.user);
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+    // Send the response
+    res.json({ username: user.username, email: user.email });
+  } catch (e) {
+    res.status(500).json({ message: e.message, error: true });
+  }
+};
+
+module.exports.updatePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    // Find the user
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+
+    // Hash New Password
+    const hashedPassword = await bcrypt.hash(newPassword, 2);
+    user.password = hashedPassword;
+    // ReSave
+    await user.save({
+      validateBeforeSave: false,
+    });
+    //!Send the response
+    res.json({ message: 'Password Changed successfully' });
+  } catch (e) {
+    res.status(500).json({ message: e.message, error: true });
+  }
+};
+
+module.exports.updateProfile = async (req, res) => {
+  try {
+    const { email, username } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user,
+      {
+        username,
+        email,
+      },
+      {
+        new: true,
+      }
+    );
+    res.json({ message: 'User profile updated successfully', updatedUser });
+  } catch (e) {
+    res.status(500).json({ message: e.message, error: true });
+  }
+};

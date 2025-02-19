@@ -1,48 +1,56 @@
-import React, { useEffect } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import React, { useEffect } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import {
   FaDollarSign,
   FaCalendarAlt,
   FaRegCommentDots,
   FaWallet,
-} from 'react-icons/fa';
-import { SiDatabricks } from 'react-icons/si';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { addCategoryAPI } from '../../../../services/category/categoryService';
-import AlertMessage from '../../../../components/Alert/AlertMessage';
+} from "react-icons/fa";
+import { SiDatabricks } from "react-icons/si";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
+import { updateCategoryAPI } from "../../../../services/category/categoryService";
+import AlertMessage from "../../../../components/Alert/AlertMessage";
 
 const validationSchema = Yup.object({
-  name: Yup.string().required('Category name is required'),
+  name: Yup.string()
+    .required("Category name is required")
+    .oneOf(["income", "expense"]),
   type: Yup.string()
-    .required('Category type is required')
-    .oneOf(['income', 'expense']),
+    .required("Category type is required")
+    .oneOf(["income", "expense"]),
 });
 
-import './add.css';
 
-const Add = () => {
+const Update = () => {
+  const { id } = useParams();
+  console.log(id);
+  //Navigate
   const navigate = useNavigate();
 
-  // FOR ASYNC REQUEST
+  // Mutation
   const { mutateAsync, isPending, isError, error, isSuccess } = useMutation({
-    mutationFn: addCategoryAPI,
-    mutationKey: ['login'],
+    mutationFn: updateCategoryAPI,
+    mutationKey: ["update-category"],
   });
 
   const formik = useFormik({
     initialValues: {
-      type: '',
-      name: '',
+      type: "",
+      name: "",
     },
-    validationSchema,
-    onSubmit: values => {
-      mutateAsync(values)
-        .then(data => {
-          navigate('/user/categories');
+    onSubmit: (values) => {
+      const data = {
+        ...values,
+        id,
+      };
+      mutateAsync(data)
+        .then((data) => {
+          //redirect
+          navigate("/user/categories");
         })
-        .catch(e => console.log(e));
+        .catch((e) => console.log(e));
     },
   });
 
@@ -53,19 +61,25 @@ const Add = () => {
     >
       <div className="text-center">
         <h2 className="text-2xl font-semibold text-gray-800">
-          Add New Category
+          Update Category
         </h2>
-        {/* <p className="text-gray-600">Fill in the details below.</p> */}
+        <p className="text-gray-600">Fill in the details below.</p>
       </div>
       {/* Display alert message */}
       {isError && (
         <AlertMessage
           type="error"
-          message={error?.response?.data?.message || 'Please try again later'}
+          message={
+            error?.response?.data?.message ||
+            "Something happened please try again later"
+          }
         />
       )}
       {isSuccess && (
-        <AlertMessage type="success" message="Category added successfully" />
+        <AlertMessage
+          type="success"
+          message="Category updated successfully, redirecting..."
+        />
       )}
       {/* Category Type */}
       <div className="space-y-2">
@@ -77,11 +91,11 @@ const Add = () => {
           <span>Type</span>
         </label>
         <select
-          {...formik.getFieldProps('type')}
+          {...formik.getFieldProps("type")}
           id="type"
           className="w-full p-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
         >
-          <option value="">Select type</option>
+          <option value="">Select transaction type</option>
           <option value="income">Income</option>
           <option value="expense">Expense</option>
         </select>
@@ -98,7 +112,7 @@ const Add = () => {
         </label>
         <input
           type="text"
-          {...formik.getFieldProps('name')}
+          {...formik.getFieldProps("name")}
           placeholder="Name"
           id="name"
           className="w-full mt-1 border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 py-2 px-3"
@@ -113,9 +127,9 @@ const Add = () => {
         type="submit"
         className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors duration-200 transform"
       >
-        Add Category
+        Update Category
       </button>
     </form>
   );
 };
-export default Add;
+export default Update;
