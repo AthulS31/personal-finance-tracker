@@ -76,7 +76,7 @@ const Profile = () => {
             <FaEnvelope className="text-3xl text-gray-400" />
             <div className="flex-1">
               <label
-                htmlFor="email"
+                htmlFor="email"x
                 className="text-sm font-medium text-gray-700"
               >
                 Email

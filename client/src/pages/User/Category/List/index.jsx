@@ -69,7 +69,7 @@ const List = () => {
                 </button>
               </Link>
               <button
-                // onClick={() => handleDelete(category?._id)}
+                onClick={() => handleDelete(category?._id)}
                 className="text-red-500 hover:text-red-700"
               >
                 <FaTrash />

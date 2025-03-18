@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { IoLogOutOutline } from "react-icons/io5";
 import { SiAuthy } from "react-icons/si";
+import { TbPigMoney } from "react-icons/tb";
 import { logoutAction } from "../../redux/slice/Authentication-Slice";
 
 function classNames(...classes) {
@@ -42,11 +43,11 @@ export default function PrivateNavbar() {
                 </div>
                 <div className="flex flex-shrink-0 items-center">
                   {/* Logo */}
-                  <SiAuthy className="h-8 w-auto text-green-500" />
+                  <TbPigMoney className="h-8 w-auto text-green-500" />
                 </div>
                 <div className="hidden md:ml-6 md:flex md:space-x-8">
                   <Link
-                    to="/user/"
+                    to="/user/home"
                     className="inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
                   >
                     SpendWise
@@ -154,7 +155,7 @@ export default function PrivateNavbar() {
           {/* Mobile Navs  private links*/}
           <Disclosure.Panel className="md:hidden">
             <div className="space-y-1 pb-3 pt-2">
-              <Link to="/user/">
+              <Link to="/user/home">
                 <Disclosure.Button
                   as="button"
                   className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700 sm:pl-5 sm:pr-6"
@@ -170,7 +171,7 @@ export default function PrivateNavbar() {
                   Add Transaction
                 </Disclosure.Button>
               </Link>
-              <Link to="/user/add-category">
+              <Link to="/user/category/add-category">
                 <Disclosure.Button
                   as="button"
                   className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700 sm:pl-5 sm:pr-6"

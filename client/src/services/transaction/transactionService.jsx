@@ -35,17 +35,20 @@ export const listTransactionsAPI = async ({
   return response.data;
 };
 
-// // UPDATE
-// export const updateCategoryAPI = async ({ name, type, id }) => {
-//   const response = await axios.put(`${BASE_URL}/categories/update/${id}`, {
-//     name,
-//     type,
-//   });
-//   return response.data;
-// };
+// UPDATE
+export const updateTransactionAPI = async ({ type,amount,category,date,description, id }) => {
+  const response = await axios.put(`/transaction/update/${id}`, {
+    type,
+    amount,
+    category,
+    date,
+    description,
+  });
+  return response.data;
+};
 
-// // DELETE
-// export const deleteCategoryAPI = async id => {
-//   const response = await axios.delete(`${BASE_URL}/categories/delete/${id}`);
-//   return response.data;
-// };
+// DELETE
+export const deleteTransactionAPI = async id => {
+  const response = await axios.delete(`/transaction/delete/${id}`);
+  return response.data;
+};

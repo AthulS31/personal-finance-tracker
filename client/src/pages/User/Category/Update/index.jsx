@@ -65,7 +65,7 @@ const Update = () => {
         </h2>
         <p className="text-gray-600">Fill in the details below.</p>
       </div>
-      {/* Display alert message */}
+      {/* Alert message */}
       {isError && (
         <AlertMessage
           type="error"
@@ -81,6 +81,8 @@ const Update = () => {
           message="Category updated successfully, redirecting..."
         />
       )}
+      {/* Alert message */}
+      
       {/* Category Type */}
       <div className="space-y-2">
         <label
