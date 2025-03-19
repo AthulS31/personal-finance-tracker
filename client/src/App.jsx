@@ -10,12 +10,10 @@ import UpdateCategory from './pages/User/Category/Update';
 import AddTransaction from './pages/User/Transaction/Add';
 import UpdateTransaction from './pages/User/Transaction/Update';
 import PrivateRoute from './components/PrivateRoute';
-// import { checkToken } from './utils';
 import PublicNavbar from "./components/Navbar/Public";
 import PrivateNavbar from './components/Navbar/Private';
 import ExpenseTracker from './pages/User/ExpenseTracker';
 import HomePublic from './pages/User/HomePublic';
-// import './App.css';
 const App = () => {
   const user = useSelector((state) => state?.auth?.user);
   return (
